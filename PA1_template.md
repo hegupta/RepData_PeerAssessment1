@@ -14,7 +14,8 @@ data-frame using the read.csv() routine.
 The date column is transformed into values of type "Date" to make it easier
 to work with.
 
-```{r}
+
+```r
 furl <- "https://d396qusza40orc.cloudfront.net/repdata%2Fdata%2Factivity.zip"
 if (! file.exists("activity.csv")) {
     if (! file.exists("activity.zip")) {
@@ -36,7 +37,8 @@ The mean and median values of the total number of steps per day are then
 computed and saved for later reporting. A histogram over the per-day total
 step count is also plotted.
 
-```{r}
+
+```r
 spd <- tapply(dat$steps, dat$date, sum, na.rm = TRUE)
 meanspd <- mean(spd)
 medspd <- median(spd)
@@ -44,12 +46,14 @@ hist(spd, main = "Histogram of total number of steps taken per day",
      xlab = "Total number of steps taken per day")
 ```
 
+![plot of chunk unnamed-chunk-2](figure/unnamed-chunk-2-1.png) 
+
 Based on the above computations, the mean and median of the total number of
 steps taken per day are as follows:  
 
-Mean: `r as.integer(meanspd)`  
+Mean: 9354  
 
-Median: `r as.integer(medspd)`
+Median: 10395
 
 ## What is the average daily activity pattern?
 
@@ -64,8 +68,29 @@ The interval corresponding to the maximum average step count is then
 determined and saved for later reporting. A line-plot of the average step
 count vs. the 5-minute intervals is also plotted.
 
-```{r}
+
+```r
 library(dplyr)
+```
+
+```
+## Warning: package 'dplyr' was built under R version 3.2.3
+```
+
+```
+## 
+## Attaching package: 'dplyr'
+## 
+## The following objects are masked from 'package:stats':
+## 
+##     filter, lag
+## 
+## The following objects are masked from 'package:base':
+## 
+##     intersect, setdiff, setequal, union
+```
+
+```r
 gbi <- group_by(dat, interval)
 aspi <- summarize(gbi, avg_steps = mean(steps, na.rm = TRUE))
 maxstepint <- aspi$interval[which.max(aspi$avg_steps)]
@@ -74,9 +99,11 @@ plot(aspi$interval, aspi$avg_steps, type="l",
      xlab = "5-minute interval", ylab = "Average daily steps")
 ```
 
+![plot of chunk unnamed-chunk-3](figure/unnamed-chunk-3-1.png) 
+
 Based on the above computations, the 5-minute interval which corresponds to the
-maximum step count averaged over all days turns out to be minute `r maxstepint`
-to minute `r (maxstepint + 5)`.
+maximum step count averaged over all days turns out to be minute 835
+to minute 840.
 
 ## Imputing missing values
 
@@ -89,7 +116,8 @@ have already been computed previously, and we can reuse that data here.
 Once the missing values have been filled in, we then re-compute the total
 step count for each day and then plot a histogram over this data.
 
-```{r}
+
+```r
 mvc <- sum(is.na(dat$steps))
 dat_imp <- merge(dat, aspi, by.x = "interval", by.y = "interval")
 dat_imp$imputed_steps <- apply(dat_imp, 1, function(x) {
@@ -106,22 +134,24 @@ hist(ispd,
      xlab="Total number of steps taken per day (with imputation)")
 ```
 
+![plot of chunk unnamed-chunk-4](figure/unnamed-chunk-4-1.png) 
+
 Based on the above computations, the number of rows in the original data with
-missing values turns out to be `r mvc`.  
+missing values turns out to be 2304.  
 
 Above, we have also re-computed the mean and median of the total number of
 steps taken per day after the missing values have been filled in. These new
 values are as follows:  
-Mean: `r as.integer(meanispd)`  
-Median: `r as.integer(medispd)`  
+Mean: 10766  
+Median: 10766  
 
 Interestingly, the new mean and median turn out to be very closely aligned
 after imputation of missing values. The new values also deviate a bit from the
 original ones, with the mean deviating much more than the median. In relative
 terms (when compared to the original values), the deviations are as follows:  
-New mean: `r (((meanispd - meanspd) * 100.0)/meanspd)`%
+New mean: 15.0943396%
 deviation from original value.  
-New median: `r (((medispd - medspd) * 100.0)/medspd)`%
+New median: 3.5708387%
 deviation from original value.
 
 ## Are there differences in activity patterns between weekdays and weekends?
@@ -141,7 +171,8 @@ Finally, a time-series plot is constructed for average step count vs.
 comparison of the plots within these two panels enables us to compare the
 activity patterns between weekdays and weekends.
 
-```{r}
+
+```r
 library(lattice)
 dat_imp$datetype <- sapply(dat_imp$date, function (x) {
     wd <- weekdays(x)
@@ -156,3 +187,5 @@ aspiw <- summarize(gbiw, avg_steps = mean(imputed_steps))
 xyplot(avg_steps ~ interval | datetype, data = aspiw, layout = c(1,2),
        type="l", xlab = "Interval", ylab = "Number of steps")
 ```
+
+![plot of chunk unnamed-chunk-5](figure/unnamed-chunk-5-1.png) 
